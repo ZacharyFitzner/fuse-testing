@@ -1,0 +1,31 @@
+# For documentation on log4j2: https://logging.apache.org/log4j/2.x/manual/
+
+# For configuration details: springframework.guru/log4j-2-configuration-using-yaml
+# and: http://logging.apache.org/log4j/2.x/manual/configuration.html
+
+# Sending all logs to stdout, useful for running in the cloud
+    
+Configuration:
+  name: Default
+
+
+  Appenders:
+  
+    Console:
+      name: Console
+      target: SYSTEM_OUT
+      PatternLayout:
+        Pattern: "%d{yyyy.MM.dd HH:mm:ss.SSS} [%t] %-5level [%X{X-B3-TraceId}/%X{X-B3-SpanId}] %logger{1.} - %X{internal-request-id}%X{external-request-id}%msg%n%xThrowable{separator(|)}"
+          
+  Loggers:
+    # Define some defaults
+    Root:
+      level: info 
+      AppenderRef:
+        - ref: Console               
+
+    Logger:
+      # Turn off Spring auto-configuration debug-level logging because it adds a lot of noise to startup logs
+      # If Spring debug logging is off this isn't necessary
+      - name: org.springframework.boot.autoconfigure.logging.AutoConfigurationReportLoggingInitializer
+        level: info

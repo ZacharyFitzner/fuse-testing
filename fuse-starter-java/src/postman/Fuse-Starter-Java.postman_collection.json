@@ -1,0 +1,181 @@
+{
+	"info": {
+		"_postman_id": "f3baf414-e6f2-46bd-97b2-b3f61babb722",
+		"name": "Fuse-Starter-Java",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "SE - Create missions",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer 2V6H4BIS5SBIOG6G6OZMSURROMYEFGKU"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{ \"agreements\" : \n    [\n    \t{\n\t\t\t\"instrument\": \"IBM\",\n\t\t\t\"internalParty\": \"INT-1\",\n\t\t\t\"externalParty\": \"EXT-1\",\n\t\t\t\"buySell\": \"B\",\n\t\t\t\"qty\": 100\n\t\t},\n    \t{\n\t\t\t\"instrument\": \"IBM\",\n\t\t\t\"internalParty\": \"INT-1\",\n\t\t\t\"externalParty\": \"EXT-1\",\n\t\t\t\"buySell\": \"B\",\n\t\t\t\"qty\": 100\n\t\t}\n\t]\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}/settlementEngine",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"settlementEngine"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SE - Get mission",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/settlementEngine/mission/1",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"settlementEngine",
+						"mission",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SE - Get missions",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/settlementEngine/missions?ids=1,2&format=csv",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"settlementEngine",
+						"missions"
+					],
+					"query": [
+						{
+							"key": "ids",
+							"value": "1,2"
+						},
+						{
+							"key": "format",
+							"value": "csv"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SE - Update mission",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n\t\t\"id\": 4,\r\n\t\t\"instrument\": \"estst\",\r\n\t\t\"internalParty\": \"sfddsftest\",\r\n\t\t\"externalParty\": \"tesdfsdfst\",\r\n\t\t\"buySell\": \"B\",\r\n\t\t\"qty\": 1,\r\n\t\t\"version\": 0\r\n}"
+				},
+				"url": {
+					"raw": "http://{{host}}/settlementEngine/mission/1",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"settlementEngine",
+						"mission",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IEX - Get all symbols",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/iex/symbols",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"iex",
+						"symbols"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "IEX - Get last traded price",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/iex/lastTradedPrice?symbols=IBM",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"iex",
+						"lastTradedPrice"
+					],
+					"query": [
+						{
+							"key": "symbols",
+							"value": "IBM"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Run Trace",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://{{host}}/trace",
+					"protocol": "http",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"trace"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
