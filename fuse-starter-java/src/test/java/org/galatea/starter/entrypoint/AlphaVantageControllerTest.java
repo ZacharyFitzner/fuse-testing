@@ -30,6 +30,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
 
@@ -53,8 +54,12 @@ public class AlphaVantageControllerTest extends ASpringTest {
   public void testAlphaVantageEndpoint() throws Exception {
 
     Reader reader = Files.newBufferedReader(Paths.get("C:\\Users\\fitzn\\Desktop\\deleteBranch\\testFuse\\fuse-starter-java\\src\\test\\java\\org\\galatea\\starter\\entrypoint\\responseEntityExample.json"));
+    Reader readerResult = Files.newBufferedReader(Paths.get("C:\\Users\\fitzn\\Desktop\\deleteBranch\\testFuse\\fuse-starter-java\\src\\test\\java\\org\\galatea\\starter\\entrypoint\\tslaData.json"));
+
     ObjectMapper objectMapper = new ObjectMapper();
+
     JsonNode teslaJson = objectMapper.readTree(reader);
+    JsonNode resultJson = objectMapper.readTree(readerResult);
 
     ResponseEntity<JsonNode> teslaResp = new ResponseEntity(teslaJson, HttpStatus.OK);
 
@@ -67,6 +72,7 @@ public class AlphaVantageControllerTest extends ASpringTest {
     given(this.restTemp.getForEntity(alphaVantageUrl + stock + alphaAPI, JsonNode.class)).willReturn(teslaResp);
 
     this.mvc.perform(
-        get("/avp").param(stockLabel, stock).accept(MediaType.APPLICATION_JSON_VALUE)).andExpect(jsonPath("$", is("test-value")));
+        get("/avp").param(stockLabel, stock).accept(MediaType.APPLICATION_JSON_VALUE)).andExpect(
+        MockMvcResultMatchers.content().json(resultJson.toString()));
   }
 }

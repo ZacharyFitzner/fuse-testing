@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.galatea.starter.entrypoint.Stock.Stock;
-import java.util.Date;
 
 /**
  * REST Controller that listens to http endpoints and allows the caller to send text to be
@@ -81,7 +80,6 @@ public class AlphaVantageController extends BaseRestController {
 
     //    Get all stock dates
     Iterator<Map.Entry<String, JsonNode>> dates = stockDataJSON.fields();
-    Date currentDate = new Date();
 
     Map<String, String> stockDateTuple = new TreeMap<>();
     String finalNumberOfDays = String.valueOf(numberOfDays);
@@ -89,7 +87,6 @@ public class AlphaVantageController extends BaseRestController {
     Map<String, String> information = new HashMap<String, String>() {{
       put("Symbol", stock);
       put("Number of Days", finalNumberOfDays);
-      put("Date Queried", String.valueOf(currentDate));
     }};
 
 //    Find Number of Stock Dates
