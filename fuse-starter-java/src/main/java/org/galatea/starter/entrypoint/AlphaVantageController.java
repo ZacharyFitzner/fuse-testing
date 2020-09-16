@@ -10,12 +10,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.aspect4log.Log;
 import net.sf.aspect4log.Log.Level;
 import org.apache.commons.collections4.IterableUtils;
 import org.galatea.starter.entrypoint.Stock.MetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,9 @@ import java.util.Date;
 @RestController
 public class AlphaVantageController extends BaseRestController {
 
+  @Autowired
+  RestTemplate restTemplate;
+
   /**
    * Send the received text to the HalService to be processed and send the result out.
    */
@@ -46,9 +51,9 @@ public class AlphaVantageController extends BaseRestController {
       @RequestParam(value = "stock") final String stock,
       @RequestParam(value = "days", defaultValue = "10") Integer numberOfDays) throws IOException{
 
-    Stock stockResponse = getAlphaVantageResponse(stock).getBody();
+    JsonNode stockResponseJson = getAlphaVantageResponse(stock).getBody();
 
-    JsonNode returnedJSON = formatStockJSON(stockResponse.getTimeSeries(), numberOfDays, stockResponse, stock);
+    JsonNode returnedJSON = formatStockJSON(stockResponseJson.get("Time Series (Daily)"), numberOfDays, stock);
 
     log.info("{}", returnedJSON);
 
@@ -56,29 +61,29 @@ public class AlphaVantageController extends BaseRestController {
 
   }
 
-  public ResponseEntity<Stock> getAlphaVantageResponse(String stock){
+  public ResponseEntity<JsonNode> getAlphaVantageResponse(String stock){
 
-    //    Create REST call for Alphavantage
-    RestTemplate restTemplate = new RestTemplate();
     final String alphaVantageUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=full&symbol=";
     final String alphaAPI = "&apikey=randomapikey";
 
 //    GET Instance (Actual Call) to Alphavantage with Stock Data
-    ResponseEntity<Stock> stockObject
-        = restTemplate.getForEntity(alphaVantageUrl + stock + alphaAPI, Stock.class);
+    ResponseEntity<JsonNode> stockObject
+        = restTemplate.getForEntity(alphaVantageUrl + stock + alphaAPI, JsonNode.class);
 
     return stockObject;
 
   }
 
-  private JsonNode formatStockJSON(JsonNode stockDataJSON, Integer numberOfDays, Stock stockResponse, String stock)
+  private JsonNode formatStockJSON(JsonNode stockDataJSON, Integer numberOfDays, String stock)
       throws IOException {
+
+    log.debug("STOCKDATAJSON.FIELDS {}", stockDataJSON.fields());
 
     //    Get all stock dates
     Iterator<Map.Entry<String, JsonNode>> dates = stockDataJSON.fields();
     Date currentDate = new Date();
 
-    Map<String, String> stockDateTuple = new HashMap<>();
+    Map<String, String> stockDateTuple = new TreeMap<>();
     String finalNumberOfDays = String.valueOf(numberOfDays);
 
     Map<String, String> information = new HashMap<String, String>() {{
@@ -104,22 +109,21 @@ public class AlphaVantageController extends BaseRestController {
     }
 
     ObjectMapper mapper = new ObjectMapper();
-    ObjectNode stockNode = mapper.valueToTree(stockResponse);
 
     String mapString = mapper.writeValueAsString(stockDateTuple);
     JsonNode mapNode = mapper.readTree(mapString);
     JsonNode informationNode = mapper.readTree(mapper.writeValueAsString(information));
 
-    stockNode.remove("Time Series (Daily)");
-    stockNode.remove("Meta Data");
+    Map<String, JsonNode> stockJsonMap = new TreeMap<>();
 
-    stockNode.set("Stock Information", informationNode);
-    stockNode.set("Daily Close", mapNode);
+    stockJsonMap.put("Information", informationNode);
+    stockJsonMap.put("Daily Close", mapNode);
 
+    JsonNode stockJsonNode = mapper.readTree(mapper.writeValueAsString(stockJsonMap));
 
-    JsonNode result = mapper.createObjectNode().set("stock", stockNode);
+//    JsonNode result = mapper.createObjectNode().set("stock", stockNode);
 
-    return result;
+    return stockJsonNode;
   }
 
 

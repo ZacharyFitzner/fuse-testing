@@ -20,6 +20,7 @@ public class AppConfigTest {
     @Autowired
     CacheManager springCacheManager;
 
+
     /**
      * Simple test to confirm that EhCache will be created/configured as expected.
      */

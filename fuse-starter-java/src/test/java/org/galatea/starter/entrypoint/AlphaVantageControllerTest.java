@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 import org.galatea.starter.ASpringTest;
-import org.galatea.starter.entrypoint.Stock.Stock;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +46,17 @@ public class AlphaVantageControllerTest extends ASpringTest {
   @Autowired
   private MockMvc mvc;
 
-  @Autowired
   @MockBean
-  private RestTemplate restTemplate;
+  private RestTemplate restTemp;
 
   @Test
   public void testAlphaVantageEndpoint() throws Exception {
 
-    Reader reader = Files.newBufferedReader(Paths.get("C:\\Users\\fitzn\\Desktop\\deleteBranch\\testFuse\\fuse-starter-java\\src\\test\\java\\org\\galatea\\starter\\entrypoint\\tslaData.json"));
+    Reader reader = Files.newBufferedReader(Paths.get("C:\\Users\\fitzn\\Desktop\\deleteBranch\\testFuse\\fuse-starter-java\\src\\test\\java\\org\\galatea\\starter\\entrypoint\\responseEntityExample.json"));
     ObjectMapper objectMapper = new ObjectMapper();
     JsonNode teslaJson = objectMapper.readTree(reader);
 
-    ResponseEntity<Stock> teslaResp = new ResponseEntity(teslaJson, HttpStatus.OK);
+    ResponseEntity<JsonNode> teslaResp = new ResponseEntity(teslaJson, HttpStatus.OK);
 
     String stock = "TSLA";
     String stockLabel = "stock";
@@ -66,9 +64,9 @@ public class AlphaVantageControllerTest extends ASpringTest {
     final String alphaVantageUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=full&symbol=";
     final String alphaAPI = "&apikey=randomapikey";
 
-    given(restTemplate.getForEntity(alphaVantageUrl + stock + alphaAPI, Stock.class)).willReturn(teslaResp);
+    given(this.restTemp.getForEntity(alphaVantageUrl + stock + alphaAPI, JsonNode.class)).willReturn(teslaResp);
 
     this.mvc.perform(
-        get("/avp").param(stockLabel, stock).accept(MediaType.APPLICATION_JSON_VALUE)).andExpect(jsonPath("$", is(teslaResp)));
+        get("/avp").param(stockLabel, stock).accept(MediaType.APPLICATION_JSON_VALUE)).andExpect(jsonPath("$", is("test-value")));
   }
 }

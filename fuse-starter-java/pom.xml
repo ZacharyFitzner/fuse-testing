@@ -19,7 +19,7 @@
 		<argLine>
 			-Dapplication.name=${project.artifactId}
 			-Dlog4j.configurationFile=log4j2-test.yml
-			-Dserver.port=8080
+			-Dserver.port=8088
 		</argLine>
 		<sonar.exclusions>**/ProtobufMessages.java</sonar.exclusions>
 		<sonar.coverage.exclusions>
