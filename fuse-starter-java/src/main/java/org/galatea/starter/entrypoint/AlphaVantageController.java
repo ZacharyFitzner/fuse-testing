@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.galatea.starter.entrypoint.alphavantagestock.AlphaVantageStock;
 
 /**
  * REST Controller that listens to http endpoints and allows the caller to send text to be
@@ -31,6 +32,9 @@ import org.springframework.web.client.RestTemplate;
 public class AlphaVantageController extends BaseRestController {
 
   RestTemplate restTemplate;
+  final String alphaVantageUrl =
+      "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=full&symbol=";
+  final String alphaAPI = "&apikey=randomapikey";
 
   @Autowired
   public AlphaVantageController(RestTemplate restTemplate) {this.restTemplate = restTemplate;}
@@ -40,147 +44,32 @@ public class AlphaVantageController extends BaseRestController {
    */
   // @GetMapping to link http GET request to this method
   // @RequestParam to take a parameter from the url
-
-  @GetMapping(value = "${webservice.alphavantagepath}", produces = {MediaType.APPLICATION_JSON_VALUE})
+  @GetMapping(value = "${webservice.alphavantagepath}",
+      produces = {MediaType.APPLICATION_JSON_VALUE})
   public JsonNode alphaVantageEndpoint(
       @RequestParam(value = "stock") final String stockSymbol,
-      @RequestParam(value = "days", defaultValue = "10") Integer numberOfDaysRequested) throws IOException{
-
-    JsonNode alphaVantageResponseInJson = getAlphaVantageResponse(stockSymbol);
-    JsonNode formattedStockJSONResponse = formatStockJSON(getTimeSeriesDaily(alphaVantageResponseInJson), numberOfDaysRequested, stockSymbol);
-
-    return formattedStockJSONResponse;
-
-  }
-
-  public JsonNode getAlphaVantageResponse(String stock){
-
-    final String alphaVantageUrl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&outputsize=full&symbol=";
-    final String alphaAPI = "&apikey=randomapikey";
-
-//    GET Instance (Actual Call) to Alphavantage with Stock Data
-
-    ResponseEntity<JsonNode> responseFromAlphaVantage = restTemplate.getForEntity(alphaVantageUrl + stock + alphaAPI, JsonNode.class);
-    JsonNode alphaVantageResponseInJson = responseFromAlphaVantage.getBody();
-
-
-    return alphaVantageResponseInJson;
-
-  }
-
-  public JsonNode getTimeSeriesDaily(JsonNode alphaVantageResponseInJson){
-
-    JsonNode timeSeriesJSON = alphaVantageResponseInJson.get("Time Series (Daily)");
-    assert timeSeriesJSON != null;
-
-    return timeSeriesJSON;
-  }
-
-
-  private JsonNode formatStockJSON(JsonNode stockDataJSON, Integer numberOfDays, String stock)
+      @RequestParam(value = "days", defaultValue = "10") Integer numberOfDaysRequested)
       throws IOException {
 
-    Map<String, String> filteredIntermediaryMapOfStocks = filterStockDataByNumberOfDays(stockDataJSON, numberOfDays);
-    JsonNode formattedStockJSON = createMetaDataAndStockInfoJSON(filteredIntermediaryMapOfStocks, stock, numberOfDays);
+    //Get AlphaVantage Response from Queried Stock Symbol
+    JsonNode alphaVantageResponseInJson = getAlphaVantageResponse(stockSymbol);
 
-    return formattedStockJSON;
+    //Store Data in AlphaVantageStock
+    AlphaVantageStock queriedStock =
+        new AlphaVantageStock(alphaVantageResponseInJson, numberOfDaysRequested);
 
-  }
-
-
-  private Map<String, String> filterStockDataByNumberOfDays(JsonNode stockDataJSON, Integer numberOfDays){
-
-    numberOfDays = daysLargerThanJSONFilter(numberOfDays, stockDataJSON);
-
-    Iterator<Map.Entry<String, JsonNode>> stockDates = stockDataJSON.fields();
-    Map<String, String> stockDateCloseMap = new TreeMap<>();
-
-    for (int i = 0; i < numberOfDays; i++) {
-      Map.Entry<String, JsonNode> specificDate = stockDates.next();
-
-      String   fieldDate  = specificDate.getKey();
-      String stockPrice = stockDataJSON.get(fieldDate).get("4. close").asText();
-
-      stockDateCloseMap.put(fieldDate, stockPrice);
-    }
-
-    return stockDateCloseMap;
+    return queriedStock.getFormattedResponse();
 
   }
 
+  public JsonNode getAlphaVantageResponse(String stock) {
 
-                private Integer daysLargerThanJSONFilter(Integer numberOfDaysRequested, JsonNode stockDataJSON){
+    ResponseEntity<JsonNode> responseFromAlphaVantage =
+        restTemplate.getForEntity(alphaVantageUrl + stock + alphaAPI, JsonNode.class);
 
-                  Integer totalJSONLength = IterableUtils.size(stockDataJSON);
+    JsonNode alphaVantageResponseInJson = responseFromAlphaVantage.getBody();
 
-                  if (numberOfDaysRequested > totalJSONLength){
-                    numberOfDaysRequested = totalJSONLength;
-                  }
-
-                  return numberOfDaysRequested;
-                }
-
-
-
-  private JsonNode createMetaDataAndStockInfoJSON(Map<String, String> stocksAndDatesHashMap, String stockSymbol, Integer numberOfDaysRequested) throws IOException {
-
-    JsonNode stockAndDatesJSON = createStockAndDatesJSON(stocksAndDatesHashMap);
-    JsonNode metaDataJSON = createMetaDataJSON(stockSymbol, numberOfDaysRequested);
-
-    JsonNode formattedFullStockDataJsonFinal = mergeJsonNodes(stockAndDatesJSON, metaDataJSON);
-
-    return formattedFullStockDataJsonFinal;
-
+    return alphaVantageResponseInJson;
   }
-
-              private JsonNode mergeJsonNodes(JsonNode stocksAndDatesInJSON, JsonNode metaDataInJSON)
-                  throws IOException {
-
-                Map<String, JsonNode> stockJsonMap = new TreeMap<>();
-
-                stockJsonMap.put("Information", metaDataInJSON);
-                stockJsonMap.put("Daily Close", stocksAndDatesInJSON);
-
-                JsonNode formattedFullStockDataJsonFinal = mapToJsonHelper(stockJsonMap);
-
-                return formattedFullStockDataJsonFinal;
-
-              }
-
-
-                                    private JsonNode createMetaDataJSON(String stockSymbol, Integer numberOfDaysRequested)
-                                        throws IOException {
-
-                                      Map<String, String> stockMetaData = new HashMap<>() {{
-                                        put("Symbol", stockSymbol);
-                                        put("Number of Days", String.valueOf(numberOfDaysRequested));
-                                      }};
-
-                                      JsonNode metaDataInJSON = mapToJsonHelper(stockMetaData);
-
-                                      return metaDataInJSON;
-                                    }
-
-
-                                    private JsonNode createStockAndDatesJSON(Map<String, String> stocksAndDatesHashMap)
-                                        throws IOException {
-
-                                      JsonNode stocksAndDatesInJSON = mapToJsonHelper(stocksAndDatesHashMap);
-
-                                      return stocksAndDatesInJSON;
-                                    }
-
-
-      private JsonNode mapToJsonHelper(Map mapInput) throws IOException {
-
-        ObjectMapper mapper = new ObjectMapper();
-
-        String mapString = mapper.writeValueAsString(mapInput);
-        JsonNode jsonMapValue = mapper.readTree(mapString);
-
-        return jsonMapValue;
-      }
-
 
 }
-
