@@ -25,27 +25,14 @@ public class MetaData{
     return metaData;
   }
 
-  public JsonNode getFormattedMetaData() throws IOException {
+  public Map getFormattedMetaData() throws IOException {
 
     Map<String, String> stockMetaData = new HashMap<>() {{
       put("Symbol", stockSymbol);
       put("Number of Days", String.valueOf(currentDaysRequested));
     }};
 
-    JsonNode metaDataInJSON = mapToJsonHelper(stockMetaData);
-
-    return metaDataInJSON;
+    return stockMetaData;
 
   }
-
-  private JsonNode mapToJsonHelper(Map mapInput) throws IOException {
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    String mapString = mapper.writeValueAsString(mapInput);
-    JsonNode jsonMapValue = mapper.readTree(mapString);
-
-    return jsonMapValue;
-  }
-
 }

@@ -24,8 +24,8 @@ public class TimesDaily{
     return this.fullTimesDaily;
   }
 
-  public JsonNode getFilteredTimesDaily() throws IOException {
-    return mapToJsonHelper(getFilteredMap());
+  public Map getFilteredTimesDaily() throws IOException {
+    return getFilteredMap();
   }
 
   private Map<String, String> getFilteredMap() {
@@ -45,16 +45,5 @@ public class TimesDaily{
     return stockDateCloseMap;
 
   }
-
-  private JsonNode mapToJsonHelper(Map mapInput) throws IOException {
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    String mapString = mapper.writeValueAsString(mapInput);
-    JsonNode jsonMapValue = mapper.readTree(mapString);
-
-    return jsonMapValue;
-  }
-
 
 }

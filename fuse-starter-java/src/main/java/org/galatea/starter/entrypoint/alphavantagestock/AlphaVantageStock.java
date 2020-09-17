@@ -31,28 +31,15 @@ public class AlphaVantageStock {
     return timesDaily.getTimesDaily();
   }
 
-  public JsonNode getFormattedResponse() throws IOException {
+  public Map getFormattedResponse() throws IOException {
 
-    Map<String, JsonNode> stockJsonMap = new TreeMap<>();
+    Map<String, Map> stockJsonMap = new TreeMap<>();
 
     stockJsonMap.put("Information", this.metaData.getFormattedMetaData());
     stockJsonMap.put("Daily Close", this.timesDaily.getFilteredTimesDaily());
 
-    JsonNode formattedFullStockDataJsonFinal = mapToJsonHelper(stockJsonMap);
-
-    return formattedFullStockDataJsonFinal;
+    return stockJsonMap;
 
   }
-
-  private JsonNode mapToJsonHelper(Map mapInput) throws IOException {
-
-    ObjectMapper mapper = new ObjectMapper();
-
-    String mapString = mapper.writeValueAsString(mapInput);
-    JsonNode jsonMapValue = mapper.readTree(mapString);
-
-    return jsonMapValue;
-  }
-
 
 }

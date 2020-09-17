@@ -46,7 +46,7 @@ public class AlphaVantageController extends BaseRestController {
   // @RequestParam to take a parameter from the url
   @GetMapping(value = "${webservice.alphavantagepath}",
       produces = {MediaType.APPLICATION_JSON_VALUE})
-  public JsonNode alphaVantageEndpoint(
+  public Map alphaVantageEndpoint(
       @RequestParam(value = "stock") final String stockSymbol,
       @RequestParam(value = "days", defaultValue = "10") Integer numberOfDaysRequested)
       throws IOException {
