@@ -1,23 +1,16 @@
 package org.galatea.starter.entrypoint;
 
-import static org.hamcrest.Matchers.is;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.InputStream;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import junitparams.JUnitParamsRunner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
 import org.galatea.starter.ASpringTest;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,11 +20,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.client.RestTemplate;
 
 
@@ -61,7 +51,7 @@ public class AlphaVantageControllerTest extends ASpringTest {
     JsonNode teslaJson = objectMapper.readTree(reader);
     JsonNode resultJson = objectMapper.readTree(readerResult);
 
-    ResponseEntity<JsonNode> teslaResp = new ResponseEntity(teslaJson, HttpStatus.OK);
+    ResponseEntity<JsonNode> teslaResp = new ResponseEntity<>(teslaJson, HttpStatus.OK);
 
     String stock = "TSLA";
     String stockLabel = "stock";
